@@ -1,5 +1,5 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { Book } from '@prisma/client';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Book, UserOnBooks } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -53,5 +53,25 @@ export class BooksService {
                 }
             }
         })
+    }
+
+    async likeBook(likeBookInfo: Omit<UserOnBooks, 'id'>): Promise<Book> {
+        const { bookId, userId } = likeBookInfo
+        if (!(await this.prismaService.book.findUnique({ where: { id: bookId } }))) {
+            throw new NotFoundException('Book not found')
+        } else if(!(await this.prismaService.user.findUnique({ where: { id: userId} }))) {
+            throw new NotFoundException('UserNotFound')
+        }else return this.prismaService.book.update({
+            where: { id: bookId },
+            data: {
+                users: {
+                    create: {
+                        user: {
+                            connect: { id: userId },
+                        },
+                    },
+                },
+            },
+        });
     }
 }

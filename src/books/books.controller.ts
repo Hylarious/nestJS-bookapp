@@ -3,6 +3,7 @@ import { BooksService } from './books.service';
 import { CreateBookDTO } from './dtos/create-book.dto';
 import { UpdateBookDTO } from './dtos/update-book.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { LikeBookDTO } from './dtos/like-book.dto';
 
 @Controller('books')
 export class BooksController {
@@ -45,5 +46,12 @@ export class BooksController {
         return { success: true }
     }
 
+    @Post('/like')
+    @UseGuards(JwtAuthGuard)
+    async like(@Body() likeBookInfo: LikeBookDTO) {
+        
+        await this.booksService.likeBook(likeBookInfo)
+        return {success: true}
+    }
 
 }
